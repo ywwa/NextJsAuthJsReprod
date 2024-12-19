@@ -1,0 +1,38 @@
+services:
+  reprod:
+    container_name: reprodapp
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM node:20-alpine as BASE
+        WORKDIR /app
+        EXPOSE 3000
+        ENV HOSTNAME="0.0.0.0"
+        ENV PORT=3000
+        CMD ["npm", "run", "dev"]
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-db:5432/public
+      - AUTH_SECRET=
+      - AUTH_GITHUB_ID=
+      - AUTH_GITHUB_SECRET=
+    volumes:
+      - .:/app
+
+  postgres-db:
+    image: postgres:17-alpine
+    container_name: postgres-db
+    platform: linux/amd64
+    ports:
+      - "5432:5342"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=public
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
